@@ -45,6 +45,11 @@ h2{font-size:20px;font-weight:600;margin:24px 0 8px}
 .w.s{background:var(--spambg);color:var(--spam)}.w.h{background:var(--hambg);color:var(--ham)}
 .note{color:var(--mute);font-size:16px;margin:10px 0 0}
 .notice{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 14px;margin-top:14px;font-size:18px}
+.irow{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;padding:8px 2px}
+.irow .t{display:flex;gap:8px;align-items:baseline;font-weight:600}
+.irow .m{display:block;color:var(--mute);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:15px;font-weight:500;padding:0 10px;border-radius:99px;flex:none}
+.tag.s{background:var(--spambg);color:var(--spam)}.tag.h{background:var(--hambg);color:var(--ham)}
 .met{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
 .met b{display:block;font-size:38px;font-weight:500;line-height:1.1}
 .met span{color:var(--mute);font-size:16px}
@@ -68,6 +73,10 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 <div class="chips" id="samples"></div>
 <div id="histwrap" hidden><div class="lbl">Recently checked</div><div class="chips" id="hist"></div></div>
 <div class="chips" style="margin-top:14px"><button id="clr">Clear</button></div>
+<div class="lbl" style="margin-top:28px">Check your email</div>
+<div class="chips"><button id="gm">Connect Gmail</button><button id="more" hidden>Load more</button></div>
+<p class="note" id="gmsg">Pull in your latest inbox emails and see which ones the model would flag.</p>
+<div id="ilist"></div>
 </section>
 <section class="right">
 <div class="tabs" role="tablist">
@@ -137,7 +146,7 @@ function howHTML(){
 }
 function run(){
  const a=+$('alpha').value,th=+$('thr').value;
- $('av').textContent=a.toFixed(1);$('tv').textContent=th.toFixed(2);
+ $('av').textContent=a.toFixed(1);$('tv').textContent=th.toFixed(2);if(rows.length)drawMail();
  $('out').innerHTML=tab==='result'?resultHTML(a,th):tab==='metrics'?metricsHTML(a,th):howHTML();
  const cp=$('copy');if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(last);cp.textContent='Copied'}catch(e){cp.textContent='Copy not available here'}};
  const fx=$('fix');if(fx)fx.onclick=()=>{const t=$('inp').value.trim(),ex=data.find(r=>r.u&&r.t===t);let msg='Added as '+(fixTo?'spam':'not spam')+' and retrained.';
@@ -162,6 +171,30 @@ document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{notice='';$('inp
 $('clr').onclick=()=>{notice='';$('inp').value='';run();$('inp').focus()};
 $('theme').onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dark?'light':'dark';$('theme').textContent=dark?'Dark mode':'Light mode'};
 if(matchMedia('(prefers-color-scheme:dark)').matches)$('theme').textContent='Light mode';
+const dec=s=>{const d=document.createElement('textarea');d.innerHTML=s||'';return d.value.replace(/[\u034f\u200b-\u200f\u00ad\u2007]/g,'').replace(/\s+/g,' ').trim()};
+let mcp=null,pageToken='',rows=[];
+const errMsg=e=>({needs_reauth:'Gmail needs to be reconnected. Go to claude.ai Settings, then Connectors.',server_not_connected:'Gmail is not connected. Add it in claude.ai Settings, then Connectors.',not_in_manifest:'Gmail access was not allowed for this page. Reload and choose Allow.',blocked_by_policy:'Your organization blocks Gmail access here.',selection_required:'You have more than one Gmail connector. Pick one when asked.',approval_required:'Gmail needs your approval. Click the button again and allow it.',server_unavailable:'Gmail did not respond. Try again in a moment.',tool_error:'Gmail reported an error: '+((e&&e.message)||'')}[e&&e.code]||'Something went wrong reaching Gmail. Try again.');
+async function loadMail(more){
+ const g=$('gmsg');g.textContent='Connecting to Gmail...';
+ try{
+  if(typeof claude==='undefined'){g.textContent='The inbox connection only works when this page is opened in claude.ai.';return}
+  mcp=mcp||await claude.use('mcp');
+  if(!mcp){g.textContent='The inbox connection is not available in this view. Open the page in claude.ai.';return}
+  const res=await mcp.callTool('Gmail','search_threads',{query:'in:inbox',pageSize:15,view:'THREAD_VIEW_MINIMAL',...(more&&pageToken?{pageToken}:{})},{cache:false});
+  let p=res.payload;if(typeof p==='string'){try{p=JSON.parse(p)}catch(e){p={}}}
+  const th=(p&&p.threads)||[];pageToken=(p&&p.nextPageToken)||'';
+  if(!more)rows=[];
+  th.forEach(t=>{const m=(t.messages||[])[0];if(m)rows.push({subject:dec(m.subject)||'(no subject)',sender:dec(m.sender),snippet:dec(m.snippet)})});
+  g.textContent=rows.length?'Emails are read and checked in your browser. Nothing is saved or sent anywhere. Click one to see the full result.':'No emails found.';
+  $('gm').textContent='Refresh inbox';$('more').hidden=!pageToken;drawMail();
+ }catch(e){g.textContent=errMsg(e)}
+}
+function drawMail(){
+ const m=train(data,+$('alpha').value),th=+$('thr').value;
+ $('ilist').innerHTML=rows.map((r,i)=>{const sp=predict(m,r.subject+' '+r.snippet).p>=th;return`<button class="irow" data-i="${i}"><span class="t"><span class="tag ${sp?'s':'h'}">${sp?'Spam':'Not spam'}</span><span>${esc(r.subject)}</span></span><span class="m">${esc(r.sender)}: ${esc(r.snippet)}</span></button>`}).join('');
+ $('ilist').querySelectorAll('.irow').forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.i];notice='';$('inp').value=r.subject+'\n\n'+r.snippet;tab='result';sync();run();$('out').scrollIntoView({behavior:'smooth'})});
+}
+$('gm').onclick=()=>loadMail(false);$('more').onclick=()=>loadMail(true);
 run();
 </script>
 </body>
