@@ -4,78 +4,110 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Spam checker</title>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff;--ink:#151a30;--mute:#6a7088;--line:#e3e5ec;--soft:#f6f7fa;--spam:#b3202f;--spambg:#fbe9eb;--ham:#1f6f5a;--hambg:#e3f3ee;
+:root{--bg:#f4f4f5;--card:#ffffff;--ink:#09090b;--mute:#71717a;--line:#e4e4e7;--a1:#2563eb;--a2:#2563eb;--spam:#e5484d;--spambg:#fdecec;--ham:#0e9f6e;--hambg:#e6f7ef;--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.06);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1220;--ink:#eceff8;--mute:#9aa1bb;--line:#262c45;--soft:#151a2e;--spam:#ff7d8c;--spambg:#3a1c25;--ham:#5fd4b3;--hambg:#12352d}}
-:root[data-theme="dark"]{--bg:#0e1220;--ink:#eceff8;--mute:#9aa1bb;--line:#262c45;--soft:#151a2e;--spam:#ff7d8c;--spambg:#3a1c25;--ham:#5fd4b3;--hambg:#12352d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#09090b;--card:#111113;--ink:#fafafa;--mute:#a1a1aa;--line:#27272a;--a1:#3b82f6;--a2:#3b82f6;--spam:#f87171;--spambg:#2a1214;--ham:#34d399;--hambg:#0d2a21;--shadow:0 8px 24px rgba(0,0,0,.5)}}
+:root[data-theme="dark"]{--bg:#09090b;--card:#111113;--ink:#fafafa;--mute:#a1a1aa;--line:#27272a;--a1:#3b82f6;--a2:#3b82f6;--spam:#f87171;--spambg:#2a1214;--ham:#34d399;--hambg:#0d2a21;--shadow:0 8px 24px rgba(0,0,0,.5)}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font-family:'EB Garamond',Garamond,Georgia,serif;font-size:19px;line-height:1.5}
-.app{min-height:100%;display:grid;grid-template-columns:1fr 1fr}
-@media(min-width:821px){.app{height:100%}.left,.right{height:100%;overflow-y:auto}}
+body{color:var(--ink);font-family:'Geist','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:16px;line-height:1.5;background:var(--bg)}
+.app{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px;min-height:100%}
+@media(min-width:821px){.app{height:100%;grid-template-rows:minmax(0,1fr)}.left,.right{overflow-y:auto}}
 @media(max-width:820px){.app{grid-template-columns:1fr}.left textarea{min-height:200px}}
-.left,.right{padding:36px clamp(20px,4vw,56px);display:flex;flex-direction:column}
-.right{background:var(--soft);border-left:1px solid var(--line)}
-h1{font-size:clamp(34px,4.5vw,52px);font-weight:500;margin:0 0 4px;letter-spacing:-.01em;line-height:1.1}
+.left,.right{display:flex;flex-direction:column;padding:30px clamp(18px,3vw,40px);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.eyebrow{align-self:flex-start;font-size:13px;font-weight:500;padding:2px 12px;border-radius:99px;border:1px solid var(--line);color:var(--mute);margin-bottom:12px}
+h1{font-size:clamp(30px,4vw,46px);font-weight:600;margin:0 0 4px;letter-spacing:-.02em;line-height:1.08}
 .sub{color:var(--mute);margin:0 0 18px}
-textarea{flex:1;min-height:240px;width:100%;border:1px solid var(--line);border-radius:8px;padding:18px;font:inherit;font-size:20px;background:var(--bg);color:var(--ink);resize:none}
-textarea:focus,button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.lbl{color:var(--mute);font-size:16px;margin:16px 0 6px}
+textarea{flex:1;min-height:240px;width:100%;border:1.5px solid var(--line);border-radius:16px;padding:18px;font:inherit;font-size:17px;background:var(--bg);color:var(--ink);resize:none;transition:border-color .2s,box-shadow .2s}
+textarea:focus{outline:none;border-color:var(--a1);box-shadow:0 0 0 4px color-mix(in srgb,var(--a1) 25%,transparent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--a1);outline-offset:3px}
+.count{color:var(--mute);font-size:13px;text-align:right;margin-top:4px;min-height:1.3em}
+.lbl{color:var(--mute);font-size:14px;margin:14px 0 6px;font-weight:500}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-button{font:inherit;font-size:17px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:4px 14px;border-radius:99px;cursor:pointer}
-button:hover{border-color:var(--ink)}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:4px 14px;border-radius:99px;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
+button:hover{transform:translateY(-2px);border-color:var(--a1);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+button:active{transform:scale(.96)}
 .chips .s{color:var(--spam)}.chips .h{color:var(--ham)}
-.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);align-items:center}
-.tabs .tab{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:6px 0;font-size:20px;color:var(--mute)}
-.tabs .tab[aria-selected=true]{border-color:var(--ink);color:var(--ink);font-weight:600}
-.tabs .theme{margin-left:auto;font-size:16px;margin-bottom:4px}
-.result{flex:1;padding-top:8px}
-.empty{color:var(--mute);font-size:22px;margin-top:20px}
-.verdict{font-size:clamp(56px,8vw,96px);font-weight:500;line-height:1;margin:14px 0 0;letter-spacing:-.02em}
-.verdict.spam{color:var(--spam)}.verdict.ham{color:var(--ham)}
-.conf{font-size:22px;font-weight:500;margin:8px 0 0}
-.pct{font-size:19px;color:var(--mute);margin:0 0 12px}
-.bar{height:10px;border-radius:5px;background:var(--hambg);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--spam);width:0;transition:width .25s}
-h2{font-size:20px;font-weight:600;margin:24px 0 8px}
+#gm,#copy{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:500}
+#fix{color:var(--spam);border-color:var(--spam)}
+.tabs{display:flex;gap:4px;align-items:center;background:var(--bg);border:1px solid var(--line);padding:4px;border-radius:99px}
+.tabs .tab{border:0;border-radius:99px;background:none;padding:5px 16px;font-size:16px;color:var(--mute);box-shadow:none}
+.tabs .tab:hover{transform:none;box-shadow:none;color:var(--ink)}
+.tabs .tab[aria-selected=true]{background:var(--ink);color:var(--bg);font-weight:600}
+.tabs .theme{margin-left:auto;font-size:14px;padding:2px 12px}
+.result{flex:1;padding-top:6px}
+.empty{margin-top:22px;padding:40px 20px;border:2px dashed var(--line);border-radius:20px;text-align:center;color:var(--mute);font-size:19px}
+.hero{display:flex;align-items:center;gap:24px;margin-top:22px;flex-wrap:wrap}
+.hero.spam{--c:var(--spam)}.hero.ham{--c:var(--ham)}
+.ring{position:relative;width:150px;height:150px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:10}
+.rt{stroke:var(--line)}
+.rf{stroke:var(--c);stroke-linecap:round;stroke-dasharray:326.73}
+.play .rf{animation:fill .9s cubic-bezier(.2,.8,.2,1)}
+@keyframes fill{from{stroke-dashoffset:326.73}}
+.rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.rc b{font-size:34px;font-weight:600;color:var(--c)}.rc span{color:var(--mute);font-size:14px;margin-top:2px}
+.verdict{font-size:clamp(38px,5vw,60px);font-weight:600;line-height:1;margin:0;color:var(--c);letter-spacing:-.02em}
+.play .verdict{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.8);opacity:0}}
+.pill{display:inline-block;margin-top:10px;padding:2px 14px;border-radius:99px;font-weight:600;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+h2{font-size:17px;font-weight:600;margin:26px 0 10px}
 .words{display:flex;flex-wrap:wrap;gap:8px}
-.w{font-size:18px;padding:1px 12px;border-radius:99px}
+.w{font-size:15px;padding:1px 13px;border-radius:99px;transition:transform .15s;cursor:default}
+.w:hover{transform:translateY(-2px) scale(1.08)}
 .w.s{background:var(--spambg);color:var(--spam)}.w.h{background:var(--hambg);color:var(--ham)}
-.note{color:var(--mute);font-size:16px;margin:10px 0 0}
-.notice{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 14px;margin-top:14px;font-size:18px}
-.irow{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;padding:8px 2px}
-.irow .t{display:flex;gap:8px;align-items:baseline;font-weight:600}
-.irow .m{display:block;color:var(--mute);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tag{font-size:15px;font-weight:500;padding:0 10px;border-radius:99px;flex:none}
-.tag.s{background:var(--spambg);color:var(--spam)}.tag.h{background:var(--hambg);color:var(--ham)}
-.met{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
-.met b{display:block;font-size:38px;font-weight:500;line-height:1.1}
-.met span{color:var(--mute);font-size:16px}
-.cm{border-collapse:collapse;width:100%;margin-top:18px;text-align:center;font-size:17px}
-.cm td,.cm th{border:1px solid var(--line);padding:8px;font-weight:400;background:var(--bg)}
-.steps{padding-left:22px;margin:14px 0}.steps li{margin-bottom:14px}.steps b{font-weight:600}
-.filters{border-top:1px solid var(--line);padding-top:4px;margin-top:20px}
-.f{margin-top:14px}
+.words.play .w{animation:pop .4s both;animation-delay:var(--d)}
+.note{color:var(--mute);font-size:14px;margin:10px 0 0}
+.notice{background:color-mix(in srgb,var(--a1) 12%,var(--bg));border:1px solid var(--a1);border-radius:14px;padding:8px 14px;margin-top:14px;font-size:15px}
+.met{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.mc{position:relative;padding:14px 16px 20px;border-radius:16px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.mc b{display:block;font-size:34px;font-weight:600;line-height:1.1}
+.mc span{color:var(--mute);font-size:14px}
+.mc i{position:absolute;left:0;bottom:0;height:5px;width:calc(var(--v)*100%);background:linear-gradient(90deg,var(--a1),var(--a2));transition:width .6s}
+.cm{border-collapse:separate;border-spacing:6px;width:100%;margin-top:14px;text-align:center;font-size:14px}
+.cm td,.cm th{padding:10px;font-weight:400;background:var(--bg);border-radius:12px}
+.cm td{font-size:22px;font-weight:600}
+.steps{padding-left:22px;margin:14px 0}.steps li{margin-bottom:14px}.steps b{font-weight:600;color:var(--a1)}
+.filters{margin-top:20px;padding:6px 18px 16px;border-radius:18px;background:var(--bg);border:1px solid var(--line)}
+.f{margin-top:12px}
 .f .top{display:flex;justify-content:space-between;font-weight:500}
-.f small{display:block;color:var(--mute);font-size:16px;line-height:1.3;margin-bottom:4px}
-input[type=range]{width:100%;accent-color:var(--ink)}
+.f .top span:last-child{font-weight:600;color:var(--a1)}
+.f small{display:block;color:var(--mute);font-size:14px;line-height:1.3;margin-bottom:8px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;background:var(--line);cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:4px solid var(--a1);box-shadow:0 2px 8px rgba(0,0,0,.3);transition:transform .15s}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:4px solid var(--a1);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.2)}
+.irow{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:5px solid var(--line);border-radius:14px;background:var(--bg);padding:10px 14px;margin-top:8px}
+.irow.s{border-left-color:var(--spam)}.irow.h{border-left-color:var(--ham)}
+.irow:hover{transform:translateX(4px)}
+.irow .t{display:flex;gap:8px;align-items:baseline;font-weight:600}
+.irow .m{display:block;color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:13px;font-weight:500;padding:0 10px;border-radius:99px;flex:none}
+.tag.s{background:var(--spambg);color:var(--spam)}.tag.h{background:var(--hambg);color:var(--ham)}
+.drop{display:block;border:2px dashed var(--line);border-radius:14px;padding:22px;text-align:center;color:var(--mute);cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--a1);color:var(--ink);background:var(--bg)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="app">
 <section class="left">
+<span class="eyebrow">Naive Bayes, trained in your browser</span>
 <h1>Is this email spam?</h1>
 <p class="sub">Paste an email and the verdict updates as you type.</p>
-<textarea id="inp" placeholder="Paste the subject and body here" aria-label="Email text"></textarea>
+<textarea id="inp" placeholder="Paste the subject and body here" aria-label="Email text"></textarea><div class="count" id="cnt"></div>
 <div class="lbl">Try an example</div>
 <div class="chips" id="samples"></div>
 <div id="histwrap" hidden><div class="lbl">Recently checked</div><div class="chips" id="hist"></div></div>
 <div class="chips" style="margin-top:14px"><button id="clr">Clear</button></div>
-<div class="lbl" style="margin-top:28px">Check your email</div>
-<div class="chips"><button id="gm">Connect Gmail</button><button id="more" hidden>Load more</button></div>
-<p class="note" id="gmsg">Pull in your latest inbox emails and see which ones the model would flag.</p>
+<div class="lbl" style="margin-top:28px">Check a batch of emails</div>
+<label class="drop" id="drop"><input type="file" id="file" accept=".eml,.txt,.csv,.mbox" multiple hidden>Drop .eml, .mbox, .csv or .txt files here, or click to browse</label>
+<p class="note" id="gmsg">Files are read and checked in your browser. Nothing is uploaded anywhere.</p>
+<div id="iact" class="chips" hidden><button id="iexp">Export results (CSV)</button><button id="iclr">Clear list</button></div>
+<p class="note" id="isum"></p>
 <div id="ilist"></div>
 </section>
 <section class="right">
@@ -120,17 +152,17 @@ function predict(m,text){
  const eff=[...new Set(ws)].map(w=>({w,d:lp(m,w,1)-lp(m,w,0)})).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
  return{p,eff};
 }
-let tab='result',last=null,hist=[],timer,notice='',fixTo=0;
+let tab='result',last=null,hist=[],timer,notice='',fixTo=0,lastSig='';
 try{(JSON.parse(localStorage.getItem('spamUser'))||[]).forEach(r=>data.push({t:r.t,y:r.y,w:r.w,u:1}))}catch(e){}
 const save=()=>{try{localStorage.setItem('spamUser',JSON.stringify(data.filter(r=>r.u).map(r=>({t:r.t,y:r.y,w:r.w}))))}catch(e){}};
 function resultHTML(a,th){
  const t=$('inp').value.trim();
- if(!t){last=null;return'<p class="empty">The verdict will show up here once you paste an email.</p>'}
+ if(!t){last=null;lastSig='';return'<p class="empty">Paste an email on the left and watch the gauge fill up.</p>'}
  const r=predict(train(data,a),t),sp=r.p>=th,c=Math.max(r.p,1-r.p),top=r.eff.slice(0,12);
- const conf=c>=.95?'Very confident':c>=.8?'Fairly confident':'Borderline call';
+ const conf=c>=.95?'Very confident':c>=.8?'Fairly confident':'Borderline call';const sig=(sp?1:0)+conf,play=sig!==lastSig;lastSig=sig;
  last=`${sp?'Spam':'Not spam'} (${conf.toLowerCase()}, ${(r.p*100).toFixed(1)}% chance of spam)`;
  fixTo=sp?0:1;const nu=data.filter(r=>r.u).length;
- return`${notice?`<div class="notice">${notice}</div>`:''}<p class="verdict ${sp?'spam':'ham'}">${sp?'Spam':'Not spam'}</p><p class="conf">${conf}</p><p class="pct">${(r.p*100).toFixed(1)}% chance of spam</p><div class="bar"><i style="width:${r.p*100}%"></i></div><h2>Words that moved the score most</h2><div class="words">${top.length?top.map(x=>`<span class="w ${x.d>0?'s':'h'}">${esc(x.w)}</span>`).join(''):'<span class="note">None of these words appeared in the training emails, so the model is going on its starting odds.</span>'}</div><p class="note">Red words lean spam. Green words lean not spam.</p><div class="chips" style="margin-top:16px"><button id="copy">Copy result</button><button id="fix">Wrong? Mark as ${sp?'not spam':'spam'}</button></div><p class="note">Training set: ${data.length-nu} built-in emails${nu?` plus ${nu} you corrected.`:'.'}${nu?' <button id="reset">Reset corrections</button>':''}</p>`;
+ return`${notice?`<div class="notice">${notice}</div>`:''}<div class="hero ${sp?'spam':'ham'} ${play?'play':''}"><div class="ring"><svg viewBox="0 0 120 120"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rf" cx="60" cy="60" r="52" style="stroke-dashoffset:${(326.73*(1-r.p)).toFixed(1)}"/></svg><div class="rc"><b>${Math.round(r.p*100)}%</b><span>spam</span></div></div><div><p class="verdict">${sp?'Spam':'Not spam'}</p><span class="pill">${conf}</span></div></div><h2>Words that moved the score most</h2><div class="words ${play?'play':''}">${top.length?top.map((x,i)=>`<span class="w ${x.d>0?'s':'h'}" style="--d:${i*35}ms">${esc(x.w)}</span>`).join(''):'<span class="note">None of these words appeared in the training emails, so the model is going on its starting odds.</span>'}</div><p class="note">Red words lean spam. Green words lean not spam.</p><div class="chips" style="margin-top:16px"><button id="copy">Copy result</button><button id="fix">Wrong? Mark as ${sp?'not spam':'spam'}</button></div><p class="note">Training set: ${data.length-nu} built-in emails${nu?` plus ${nu} you corrected.`:'.'}${nu?' <button id="reset">Reset corrections</button>':''}</p>`;
 }
 function metricsHTML(a,th){
  const base=data.filter(r=>!r.u),m=train(data.filter(r=>r.u||base.indexOf(r)%5!==4),a),te=base.filter((_,i)=>i%5===4);
@@ -138,7 +170,7 @@ function metricsHTML(a,th){
  te.forEach(r=>{const s=predict(m,r.t).p>=th?1:0;if(r.y&&s)tp++;else if(!r.y&&s)fp++;else if(r.y&&!s)fn++;else tn++});
  const acc=(tp+tn)/te.length,pr=tp+fp?tp/(tp+fp):0,rc=tp+fn?tp/(tp+fn):0,f1=pr+rc?2*pr*rc/(pr+rc):0;
  const pc=v=>(v*100).toFixed(0)+'%';
- return`<h2>How well does it do?</h2><p class="note" style="margin-top:0">Checked on ${te.length} held-out emails the model never trained on. Move the filters below to see the numbers change.</p><div class="met"><div><b>${pc(acc)}</b><span>Accuracy</span></div><div><b>${pc(pr)}</b><span>Precision</span></div><div><b>${pc(rc)}</b><span>Recall</span></div><div><b>${pc(f1)}</b><span>F1</span></div></div><table class="cm"><tr><th></th><th>Predicted spam</th><th>Predicted not spam</th></tr><tr><th>Actually spam</th><td>${tp}</td><td>${fn}</td></tr><tr><th>Actually not spam</th><td>${fp}</td><td>${tn}</td></tr></table><p class="note"><b>Precision</b> is how often a spam flag was right. <b>Recall</b> is how much of the real spam it caught. With so few test emails, treat these as a demo, not a benchmark.</p>`;
+ return`<h2>How well does it do?</h2><p class="note" style="margin-top:0">Checked on ${te.length} held-out emails the model never trained on. Move the filters below to see the numbers change.</p><div class="met"><div class="mc" style="--v:${acc}"><b>${pc(acc)}</b><span>Accuracy</span><i></i></div><div class="mc" style="--v:${pr}"><b>${pc(pr)}</b><span>Precision</span><i></i></div><div class="mc" style="--v:${rc}"><b>${pc(rc)}</b><span>Recall</span><i></i></div><div class="mc" style="--v:${f1}"><b>${pc(f1)}</b><span>F1</span><i></i></div></div><table class="cm"><tr><th></th><th>Predicted spam</th><th>Predicted not spam</th></tr><tr><th>Actually spam</th><td>${tp}</td><td>${fn}</td></tr><tr><th>Actually not spam</th><td>${fp}</td><td>${tn}</td></tr></table><p class="note"><b>Precision</b> is how often a spam flag was right. <b>Recall</b> is how much of the real spam it caught. With so few test emails, treat these as a demo, not a benchmark.</p>`;
 }
 function howHTML(){
  const m=train(data,1),sp=data.filter(r=>r.y).length;
@@ -146,7 +178,7 @@ function howHTML(){
 }
 function run(){
  const a=+$('alpha').value,th=+$('thr').value;
- $('av').textContent=a.toFixed(1);$('tv').textContent=th.toFixed(2);if(rows.length)drawMail();
+ $('av').textContent=a.toFixed(1);$('tv').textContent=th.toFixed(2);if(rows.length)drawMail();const wc=($('inp').value.match(/\S+/g)||[]).length;$('cnt').textContent=wc?wc+(wc===1?' word':' words'):'';
  $('out').innerHTML=tab==='result'?resultHTML(a,th):tab==='metrics'?metricsHTML(a,th):howHTML();
  const cp=$('copy');if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(last);cp.textContent='Copied'}catch(e){cp.textContent='Copy not available here'}};
  const fx=$('fix');if(fx)fx.onclick=()=>{const t=$('inp').value.trim(),ex=data.find(r=>r.u&&r.t===t);let msg='Added as '+(fixTo?'spam':'not spam')+' and retrained.';
@@ -163,7 +195,7 @@ function pushHist(){
  $('hist').querySelectorAll('button').forEach(b=>b.onclick=()=>{notice='';$('inp').value=hist[+b.dataset.i].t;tab='result';sync();run()});
 }
 function sync(){document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab))}
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;sync();run()});
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;lastSig='';sync();run()});
 $('inp').oninput=()=>{notice='';run();clearTimeout(timer);timer=setTimeout(pushHist,1200)};
 $('alpha').oninput=run;$('thr').oninput=run;
 $('samples').innerHTML=SAMPLES.map((s,i)=>`<button data-s="${i}">${s[0]}</button>`).join('');
@@ -172,29 +204,66 @@ $('clr').onclick=()=>{notice='';$('inp').value='';run();$('inp').focus()};
 $('theme').onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dark?'light':'dark';$('theme').textContent=dark?'Dark mode':'Light mode'};
 if(matchMedia('(prefers-color-scheme:dark)').matches)$('theme').textContent='Light mode';
 const dec=s=>{const d=document.createElement('textarea');d.innerHTML=s||'';return d.value.replace(/[\u034f\u200b-\u200f\u00ad\u2007]/g,'').replace(/\s+/g,' ').trim()};
-let mcp=null,pageToken='',rows=[];
-const errMsg=e=>({needs_reauth:'Gmail needs to be reconnected. Go to claude.ai Settings, then Connectors.',server_not_connected:'Gmail is not connected. Add it in claude.ai Settings, then Connectors.',not_in_manifest:'Gmail access was not allowed for this page. Reload and choose Allow.',blocked_by_policy:'Your organization blocks Gmail access here.',selection_required:'You have more than one Gmail connector. Pick one when asked.',approval_required:'Gmail needs your approval. Click the button again and allow it.',server_unavailable:'Gmail did not respond. Try again in a moment.',tool_error:'Gmail reported an error: '+((e&&e.message)||'')}[e&&e.code]||'Something went wrong reaching Gmail. Try again.');
-async function loadMail(more){
- const g=$('gmsg');g.textContent='Connecting to Gmail...';
- try{
-  if(typeof claude==='undefined'){g.textContent='The inbox connection only works when this page is opened in claude.ai.';return}
-  mcp=mcp||await claude.use('mcp');
-  if(!mcp){g.textContent='The inbox connection is not available in this view. Open the page in claude.ai.';return}
-  const res=await mcp.callTool('Gmail','search_threads',{query:'in:inbox',pageSize:15,view:'THREAD_VIEW_MINIMAL',...(more&&pageToken?{pageToken}:{})},{cache:false});
-  let p=res.payload;if(typeof p==='string'){try{p=JSON.parse(p)}catch(e){p={}}}
-  const th=(p&&p.threads)||[];pageToken=(p&&p.nextPageToken)||'';
-  if(!more)rows=[];
-  th.forEach(t=>{const m=(t.messages||[])[0];if(m)rows.push({subject:dec(m.subject)||'(no subject)',sender:dec(m.sender),snippet:dec(m.snippet)})});
-  g.textContent=rows.length?'Emails are read and checked in your browser. Nothing is saved or sent anywhere. Click one to see the full result.':'No emails found.';
-  $('gm').textContent='Refresh inbox';$('more').hidden=!pageToken;drawMail();
- }catch(e){g.textContent=errMsg(e)}
+let rows=[];
+const csvRows=t=>{const out=[];let r=[],c='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'&&t[i+1]==='"'){c+='"';i++}else if(ch==='"')q=false;else c+=ch}else if(ch==='"')q=true;else if(ch===','){r.push(c);c=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';out.push(r);r=[]}else c+=ch}if(c||r.length){r.push(c);out.push(r)}return out.filter(x=>x.some(y=>y.trim()))};
+const unfold=h=>h.replace(/\r?\n[ \t]+/g,' ');
+function bodyText(head,body){
+ const ct=(head.match(/^content-type:\s*([^;\r\n]*)/im)||[])[1]||'text/plain';
+ const bd=(head.match(/boundary="?([^";\r\n]+)"?/i)||[])[1];
+ if(/multipart/i.test(ct)&&bd){
+  const pp=body.split('--'+bd).slice(1).filter(x=>x.trim()&&!x.startsWith('--')).map(x=>{const i=x.search(/\r?\n\r?\n/);return[unfold(x.slice(0,i<0?0:i)),i<0?x:x.slice(i).trim()]});
+  const best=pp.find(x=>/text\/plain/i.test(x[0]))||pp.find(x=>/text\/html|multipart/i.test(x[0]))||pp[0];
+  return best?bodyText(best[0],best[1]):'';
+ }
+ const enc=(head.match(/content-transfer-encoding:\s*(\S+)/i)||[])[1]||'';
+ let t=body;
+ if(/quoted-printable/i.test(enc))t=t.replace(/=\r?\n/g,'').replace(/=([0-9A-F]{2})/gi,(_,x)=>String.fromCharCode(parseInt(x,16)));
+ else if(/base64/i.test(enc)){try{t=atob(t.replace(/\s+/g,''))}catch(e){}}
+ if(/html/i.test(ct))t=t.replace(/<(style|script)[\s\S]*?<\/\1>/gi,' ').replace(/<[^>]+>/g,' ');
+ return dec(t);
+}
+function parseEml(raw){
+ const i=raw.search(/\r?\n\r?\n/),head=unfold(raw.slice(0,i<0?raw.length:i)),body=i<0?'':raw.slice(i).trim();
+ const h=n=>(head.match(new RegExp('^'+n+':\\s*(.*)$','im'))||[])[1]||'';
+ return{subject:dec(h('Subject')),sender:dec(h('From')),text:bodyText(head,body)};
+}
+async function importFiles(files){
+ const add=[];
+ for(const f of files){
+  const raw=await f.text(),n=f.name.toLowerCase();
+  if(n.endsWith('.csv')){
+   const rs=csvRows(raw);if(!rs.length)continue;
+   const h=rs[0].map(x=>x.trim().toLowerCase()),si=h.findIndex(x=>/subject|title/.test(x)),bi=h.findIndex(x=>/body|text|message|content|email/.test(x)),fi=h.findIndex(x=>/from|sender/.test(x)),has=si>-1||bi>-1;
+   (has?rs.slice(1):rs).forEach(r=>add.push({subject:has?dec(r[si]||''):'',sender:has?dec(r[fi]||''):'',text:dec(has&&bi>-1?r[bi]:r.join(' '))}));
+  }else if(n.endsWith('.mbox')){
+   raw.split(/^From .*$/m).filter(x=>x.trim()).forEach(x=>add.push(parseEml(x.replace(/^\r?\n/,''))));
+  }else if(n.endsWith('.eml')){add.push(parseEml(raw))}
+  else add.push({subject:f.name,sender:'',text:dec(raw)});
+ }
+ const ok=add.map(e=>({subject:e.subject||'(no subject)',sender:e.sender||'',text:(e.text||'').slice(0,5000)})).filter(e=>e.text||e.subject!=='(no subject)');
+ rows=rows.concat(ok).slice(0,500);
+ $('gmsg').textContent=ok.length?'Added '+ok.length+' email'+(ok.length===1?'':'s')+'. Click one to see the full result.':'No readable emails found in those files.';
+ drawMail();
 }
 function drawMail(){
  const m=train(data,+$('alpha').value),th=+$('thr').value;
- $('ilist').innerHTML=rows.map((r,i)=>{const sp=predict(m,r.subject+' '+r.snippet).p>=th;return`<button class="irow" data-i="${i}"><span class="t"><span class="tag ${sp?'s':'h'}">${sp?'Spam':'Not spam'}</span><span>${esc(r.subject)}</span></span><span class="m">${esc(r.sender)}: ${esc(r.snippet)}</span></button>`}).join('');
- $('ilist').querySelectorAll('.irow').forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.i];notice='';$('inp').value=r.subject+'\n\n'+r.snippet;tab='result';sync();run();$('out').scrollIntoView({behavior:'smooth'})});
+ const v=rows.map(r=>predict(m,r.subject+' '+r.text).p),ns=v.filter(p=>p>=th).length;
+ $('isum').innerHTML=rows.length?`<b>${ns}</b> spam, <b>${rows.length-ns}</b> not spam, out of ${rows.length}`+(rows.length>100?' (showing the first 100)':''):'';
+ $('iact').hidden=!rows.length;
+ $('ilist').innerHTML=rows.slice(0,100).map((r,i)=>{const sp=v[i]>=th;return`<button class="irow ${sp?'s':'h'}" data-i="${i}"><span class="t"><span class="tag ${sp?'s':'h'}">${sp?'Spam':'Not spam'}</span><span>${esc(r.subject)}</span></span><span class="m">${esc(r.sender?r.sender+': ':'')}${esc(r.text.slice(0,160))}</span></button>`}).join('');
+ $('ilist').querySelectorAll('.irow').forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.i];notice='';$('inp').value=r.subject+'\n\n'+r.text.slice(0,3000);tab='result';sync();run();$('out').scrollIntoView({behavior:'smooth'})});
 }
-$('gm').onclick=()=>loadMail(false);$('more').onclick=()=>loadMail(true);
+const fileIn=$('file'),drop=$('drop');
+fileIn.onchange=async()=>{await importFiles(fileIn.files);fileIn.value=''};
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>importFiles(e.dataTransfer.files));
+$('iclr').onclick=()=>{rows=[];$('gmsg').textContent='Files are read and checked in your browser. Nothing is uploaded anywhere.';drawMail()};
+$('iexp').onclick=()=>{
+ const m=train(data,+$('alpha').value),th=+$('thr').value,q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+ const csv='subject,sender,verdict,spam_probability\n'+rows.map(r=>{const p=predict(m,r.subject+' '+r.text).p;return[q(r.subject),q(r.sender),p>=th?'spam':'not spam',p.toFixed(3)].join(',')}).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='spam-results.csv';a.click();
+};
 run();
 </script>
 </body>
